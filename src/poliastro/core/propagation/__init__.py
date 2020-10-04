@@ -17,6 +17,7 @@ from ..angles import (
 from ..elements import coe2rv, rv2coe
 from ..stumpff import c2, c3
 from .farnocchia import farnocchia, farnocchia_coe
+from scipy.optimize._basinhopping import kwargs
 
 __all__ = [
     "func_twobody",
@@ -904,3 +905,11 @@ def danby(k, r0, v0, tof, numiter=20, rtol=1e-8):
             n += 1
 
     raise ValueError("Maximum number of iterations has been reached.")
+
+
+@jit
+def propagator(k, r0, v0, tof, propagator_name_coe, *argv, **kwargs):
+    p, ecc, inc, raan, argp, nu0 = rv2coe(k, r0, v0)
+    nu = propagator_name_coe(p, ecc, inc, raan, argp, nu0, *argv, **kwargs)
+    return coe2rv(k, p, ecc, inc, raan, argp, nu)
+
